@@ -40,6 +40,7 @@ let result : Quotations.Expr<(string -> int)> = quote {
     let! x = 5
     foo 6
 } returns:
+
 Call (Some (ValueWithName (FSI_0164+QuoteBuilder, builder@)), Delay,
       [Lambda (unitVar,
                Call (Some (ValueWithName (FSI_0164+QuoteBuilder, builder@)), Foo,
@@ -50,9 +51,10 @@ Call (Some (ValueWithName (FSI_0164+QuoteBuilder, builder@)), Delay,
                                      Let (x, _arg1,
                                           Call (Some (ValueWithName (FSI_0164+QuoteBuilder,
                                                                      builder@)),
-                                                Yield, [x])))]), Value (6)]))])
-
+                                                Yield, [x])))]),
+                      Value (6)]))])
 *)
+
 
 (* quote {
     return! 5
