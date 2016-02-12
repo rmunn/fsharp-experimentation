@@ -49,6 +49,20 @@
 
         // member x.Quote(v) = v
 
+        member x.Run(record : TableLayoutRecord) =
+            match record.Padding with
+            | Some (AllSides n) -> printfn "Padding: %A on all sides" n
+            | Some (HV (h,v)) -> printfn "Padding: %A horiz, %A vert" h v
+            | Some (LTRB (l,t,r,b)) -> printfn "Padding: Lt %A, Top %A, Rt %A, Bot %A" l t r b
+            | None -> printfn "Default padding"
+            match record.Spacing with
+            | Some (h,v) -> printfn "Spacing: %A horiz, %A vert" h v
+            | None -> printfn "Default spacing"
+            match record.Layout with
+            | Rows [] -> printfn "No rows"
+            | _ -> printfn "Some rows, which I don't handle yet"
+            record // In real code, we'll create a TableLayout object here with right values
+
     let layout = new LayoutBuilder()
 
     let testLayout = layout {
