@@ -7,11 +7,9 @@
        | Bar of int
        | Panel of obj
 
-    type TableRow =
-       | Row of TableCell list
+    type TableRow = TableCell list
 
-    type TableLayout =
-       | Rows of TableRow list // TODO: Use PersistentVector instead so we can append in O(1) time
+    type TableLayout = TableRow list // TODO: Use PersistentVector instead so we can append in O(1) time
 
     type PaddingDU =
        | AllSides of int
@@ -28,7 +26,7 @@
         member x.Yield(()) : TableLayoutRecord = {
             Padding = None
             Spacing = None
-            Layout = Rows []
+            Layout = []
         }
 
         [<CustomOperation("padding")>]
@@ -59,16 +57,16 @@
             | Some (h,v) -> printfn "Spacing: %A horiz, %A vert" h v
             | None -> printfn "Default spacing"
             match record.Layout with
-            | Rows [] -> printfn "No rows"
+            | [] -> printfn "No rows"
             | _ -> printfn "Some rows, which I don't handle yet"
             record // In real code, we'll create a TableLayout object here with right values
 
         [<CustomOperation("row")>]
-        member x.Row(record : TableLayoutRecord, unknown, data : TableRow) =
+        member x.Row(record : TableLayoutRecord, data : TableRow) =
             // This is the hard part, but let's hope it's simple
             match record.Layout with
-            | Rows [] -> { record with Layout = Rows [data]}
-            | Rows r -> { record with Layout = Rows (r @ [data])}
+            | [] -> { record with Layout = [data]}
+            | r -> { record with Layout = r @ [data]}
 
 
     let layout = new LayoutBuilder()
@@ -78,9 +76,8 @@
         padding2 6 8
         padding4 1 2 3 4
         spacing 10 10
-        row Row (Row [  // Your boat... this isn't a good DSL yet, clearly.
+        row [
             Foo "foo"
             Bar 5
-        ])
-        
+        ]   
     }
