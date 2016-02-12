@@ -11,7 +11,7 @@
        | Row of TableCell list
 
     type TableLayout =
-       | Rows of TableRow list
+       | Rows of TableRow list // TODO: Use PersistentVector instead so we can append in O(1) time
 
     type PaddingDU =
        | AllSides of int
@@ -63,6 +63,14 @@
             | _ -> printfn "Some rows, which I don't handle yet"
             record // In real code, we'll create a TableLayout object here with right values
 
+        [<CustomOperation("row")>]
+        member x.Row(record : TableLayoutRecord, unknown, data : TableRow) =
+            // This is the hard part, but let's hope it's simple
+            match record.Layout with
+            | Rows [] -> { record with Layout = Rows [data]}
+            | Rows r -> { record with Layout = Rows (r @ [data])}
+
+
     let layout = new LayoutBuilder()
 
     let testLayout = layout {
@@ -70,4 +78,9 @@
         padding2 6 8
         padding4 1 2 3 4
         spacing 10 10
+        row Row (Row [  // Your boat... this isn't a good DSL yet, clearly.
+            Foo "foo"
+            Bar 5
+        ])
+        
     }
