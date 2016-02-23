@@ -1,13 +1,8 @@
 ﻿module TryTables =
 
     /// An attempt at doing Eto table layouts as a DSL
-
-    type TableCell =
-       | Foo of string
-       | Bar of int
-       | Panel of obj
-
-    type TableRow = TableCell list
+    
+    type TableRow = Eto.Forms.Control list
 
     type TableLayout = TableRow list // TODO: Use PersistentVector instead so we can append in O(1) time
 
@@ -21,6 +16,25 @@
         Spacing : (int * int) option
         Layout : TableLayout
     }
+
+    type AutoSizedTagRecord = {
+        IsAutoSized : bool
+        OldTag : obj
+    }
+
+    let controlToCell (c : Eto.Forms.Control) =
+        let isAutoSized =
+            match c.Tag with
+            | :? AutoSizedTagRecord as r ->
+                let b = r.IsAutoSized
+                c.Tag <- r.OldTag
+                b
+            | _ -> false
+        c.Tag <- null
+        new Eto.Forms.TableCell(c, isAutoSized)
+
+    let toEtoTableRow (row : TableRow) =
+        new Eto.Forms.TableRow(row |> List.map controlToCell)
 
     type LayoutBuilder() =
         member x.Yield(()) : TableLayoutRecord = {
@@ -59,10 +73,10 @@
             match record.Layout with
             | [] -> printfn "No rows"
             | _ -> printfn "Some rows, which I don't handle yet"
-            record // In real code, we'll create a TableLayout object here with right values
+            new Eto.Forms.TableLayout(record.Layout |> List.map toEtoTableRow)
 
         [<CustomOperation("row")>]
-        member x.Row(record : TableLayoutRecord, data : TableRow) =
+        member x.Row(record : TableLayoutRecord, data : Eto.Forms.Control list) =
             // This is the hard part, but let's hope it's simple
             match record.Layout with
             | [] -> { record with Layout = [data]}
@@ -71,13 +85,21 @@
 
     let layout = new LayoutBuilder()
 
+    let label (s:string) =
+        let lbl = new Eto.Forms.Label()
+        lbl.Text <- s
+        lbl
+
+    let autoSized (c: Eto.Forms.Control) =
+        c.Tag <- { IsAutoSized = true; OldTag = c.Tag }
+        c
+
     let testLayout = layout {
         padding 5
         padding2 6 8
         padding4 1 2 3 4
         spacing 10 10
         row [
-            Foo "foo"
-            Bar 5
+            label "This is neat" |> autoSized
         ]   
     }
